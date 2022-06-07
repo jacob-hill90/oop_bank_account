@@ -2,6 +2,7 @@ import os
 import csv
 
 class Owner():
+    owners = []
     def __init__(self, id, first, last, street, city, state):
         self.id = id
         self.first = first
@@ -12,21 +13,24 @@ class Owner():
     
     def account_owner(self):
         return f'The account owner: {self.first} {self.last}'
+   
+    @classmethod
+    def get_id(cls):
+        for i in Owner.owners:
+            print(i.id)
 
-    def owner_id(self):
-        return self.id
+    def __str__(self):
+        return self.first
    
     @classmethod
     def objects(cls):
-            owners = []
             my_path = os.path.abspath(os.path.dirname(__file__))
             path = os.path.join(my_path, "../support/owners.csv")
             with open(path) as csvfile:
-                reader = csv.DictReader(csvfile)
+                reader = csv.reader(csvfile)
                 for row in reader:
-                    owners.append(Owner(**dict(row)))
-
-            return owners
-
-
+                    person = Owner(row[0], row[1], row[2], row[3], row[4], row[5])
+                    Owner.owners.append(person)
+    
+            return Owner.owners
 
