@@ -1,49 +1,57 @@
 from .owner import Owner
-import os
 import csv
+import os
 
 class Account():
-    def __init__(self, id, balance, open_date):
+    def __init__(self, id, balance, open_date, owner = None):
+
+        if id == 666:
+            raise Exception('Bad account number')
         self.id = id
-        self.balance = int(balance)
+
+        if balance < 0:
+            raise ValueError("Balance needs to be a positive number")
+        self.balance = balance
+
         self.open_date = open_date
-        self.maybe = int(balance)
+        self.owner = owner
+
+    def __str__(self):
+        owner_name = self.owner.name if self.owner is not None else "[no name]"
+        return f"This account is owned by {owner_name} and the current balance is {self.get_balance()}"
         
-        if self.maybe > 0:
-            self.balance = balance
-        else:
-            print("Balance needs to be above zero")
+
+    def set_owner(self, owner):
+        if self.owner is not None:
+            raise Exception('Can not change owner once set')
+        self.owner = owner
+       
         
     def withdraw(self, amount):
-        expected_balance = self.balance - amount
-        if expected_balance > 0:
-            self.balance = expected_balance
-            return self.balance
-        else:
-            return f'Warning not enough funds to withdraw\nCurrent Balance: ${self.balance}'
+        if self.balance - amount < 0:
+            raise ValueError('Can not withdraw amount specified')
+        
+        self.balance = self.balance - amount
+        return self.balance
     
     def deposit(self, amount):
         self.balance = self.balance + amount
         return self.balance
 
     def get_balance(self):
-        if self.balance != None:
-            return self.balance 
-        else:
-            return "No account exists"
-
-    def get_id(self):
-        return self.id
+        return self.balance
 
     @classmethod
-    def objects(cls):
-            accounts = []
-            my_path = os.path.abspath(os.path.dirname(__file__))
-            path = os.path.join(my_path, "../support/accounts.csv")
-            with open(path) as csvfile:
-                reader = csv.reader(csvfile)
-                for row in reader:
-                    acct = Account(row[0], row[1], row[2])
-                    accounts.append(acct)
-            return accounts
-            
+    def all_accounts(cls):
+        accounts = []
+        with open("./support/accounts.csv", 'r') as accounts_file:
+            data = csv.reader(accounts_file)
+            for line in data:
+                id = int(line[0])
+                balance = int(line[1])/ 100
+                open_date = line[2]
+
+                account = cls(id, balance, open_date)
+                accounts.append(account)
+
+        return accounts
